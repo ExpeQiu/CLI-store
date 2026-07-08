@@ -1,0 +1,8 @@
+# invest CLI 用户配置（复制到 ~/.invest/config.yaml）
+state_dir: ~/.invest
+data_dir: ~/.invest/data
+mock_mode: false
+
+feishu:
+  app_id: ""
+  app_secret_env: FEISHU_APP_SECRET

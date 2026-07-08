@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "screen-watch"
+version = "0.3.1"
+description = "屏幕区域 OCR 直播监控 CLI，主攻微信客户端直播"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0.0",
+    "PyYAML>=6.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+# PaddleOCR：Python 3.14 暂无 wheel，3.9–3.13 可用
+ocr = [
+    "paddlepaddle>=2.6.0; python_version < '3.14'",
+    "paddleocr>=2.7.0; python_version < '3.14'",
+    "opencv-python-headless>=4.8.0",
+]
+# macOS 截屏 + Vision OCR（Python 3.14 推荐此组合）
+capture = [
+    "mss>=9.0.0",
+    "opencv-python-headless>=4.8.0",
+    "pillow>=10.0.0",
+    "pyobjc-framework-Quartz>=10.0; sys_platform == 'darwin'",
+    "pyobjc-framework-Cocoa>=10.0; sys_platform == 'darwin'",
+    "pyobjc-framework-Vision>=10.0; sys_platform == 'darwin'",
+]
+dev = ["pytest>=7.0.0"]
+
+[project.scripts]
+screen-watch = "screen_watch.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["screen_watch*"]

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "clauto",
+  "version": "0.2.0",
+  "cli": {
+    "command": "clauto",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "miit-demo",
+      "description": "工信部公告（演示数据）",
+      "cli_template": "clauto miit --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "news-demo",
+      "description": "汽车新闻（演示数据）",
+      "cli_template": "clauto news --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60
+    },
+    {
+      "name": "monitor-demo",
+      "description": "车型监测（演示数据）",
+      "cli_template": "clauto monitor -b {brand} -m {model} --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "params": {
+        "brand": { "type": "string", "default": "比亚迪" },
+        "model": { "type": "string", "default": "海豹" }
+      }
+    }
+  ]
+}

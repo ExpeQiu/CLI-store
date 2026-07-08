@@ -1,0 +1,20 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "intel-collect",
+  "version": "0.1.0",
+  "cli": {
+    "command": "intel-collect",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "intel-feed-demo",
+      "description": "情报 feed（演示）",
+      "cli_template": "intel-collect intel feed --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30
+    }
+  ]
+}

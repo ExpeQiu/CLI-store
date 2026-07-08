@@ -1,0 +1,23 @@
+click>=8.0.0
+PyYAML>=6.0
+numpy>=1.24.0
+
+[capture]
+mss>=9.0.0
+opencv-python-headless>=4.8.0
+pillow>=10.0.0
+
+[capture:sys_platform == "darwin"]
+pyobjc-framework-Quartz>=10.0
+pyobjc-framework-Cocoa>=10.0
+pyobjc-framework-Vision>=10.0
+
+[dev]
+pytest>=7.0.0
+
+[ocr]
+opencv-python-headless>=4.8.0
+
+[ocr:python_version < "3.14"]
+paddlepaddle>=2.6.0
+paddleocr>=2.7.0

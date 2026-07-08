@@ -1,0 +1,78 @@
+# screen-watch
+
+屏幕区域 OCR 直播监控 CLI。macOS Vision / PaddleOCR，主攻 **微信 Mac 客户端直播**。
+
+与 [`zhibo-monitor-CLI`](../zhibo-monitor-CLI) 互补：网页直播走 Playwright DOM，客户端直播走屏幕 OCR。
+
+## 安装
+
+```bash
+cd screen-watch-CLI
+python3 -m venv .venv && source .venv/bin/activate
+# Python 3.14：用 capture（macOS Vision OCR）
+pip install -e ".[capture,dev]"
+# Python 3.9–3.13：可选 PaddleOCR
+pip install -e ".[capture,ocr,dev]"
+```
+
+macOS 需授予 **屏幕录制** 权限（系统设置 → 隐私与安全性）。
+
+## 快速开始
+
+```bash
+# 离线验收
+screen-watch monitor run --demo --format json
+
+# 列出窗口
+screen-watch window list --filter 微信
+
+# 区域校准（保存截图 + 可选写 config）
+screen-watch calibrate --window "微信" --save-config config.yaml --defaults
+
+# 单帧 OCR 调试
+screen-watch capture once --region viewer_count --window "微信" \
+  --save-crop logs/debug/viewer.png -v
+
+# 启动监控
+screen-watch monitor run --window "微信" --format jsonl -o live.jsonl --save logs/screen-watch.db
+
+# 后台守护
+./scripts/start.sh && ./scripts/stop.sh
+
+# 管道入库 zhibo-monitor（发布会分析中台）
+screen-watch monitor run --window "微信" --format jsonl \
+  | zhibo-monitor ingest --platform sph-client --event-name "XX发布会" --car-brand zeekr
+
+# 或一键脚本
+./scripts/pipeline-zhibo.sh
+```
+
+## 配置
+
+复制 `config.yaml.example` 为 `config.yaml`，或使用 `~/.screen-watch/config.yaml`。
+
+优先级：CLI 参数 > 环境变量 `SCREEN_WATCH_CONFIG` > `./config.yaml` > 内置 preset。
+
+## 文档
+
+- [技术设计](guide/TECHNICAL_DESIGN.md)
+- [微信客户端直播实战清单](guide/微信客户端直播监控实战清单.md)
+
+## 验证
+
+```bash
+./verify.sh           # 离线单元测试
+./scripts/e2e-smoke.sh  # 管道 + Vision OCR + 可选 live
+```
+
+## 实施阶段
+
+| 阶段 | 状态 |
+|------|------|
+| P0 CLI 骨架 + `--demo` + verify | ✅ |
+| P1 macOS 截屏 + PaddleOCR + capture once | ✅ |
+| P2 wechat-live 监控循环 + chat diff | ✅ |
+| P3 calibrate 截图 + 区域配置 | ✅ |
+| P4 SQLite `--save` + start/stop | ✅ |
+| P5 zhibo-monitor ingest 管道 | ✅ |
+| P6 macOS Vision OCR 回退 + e2e-smoke | ✅ |

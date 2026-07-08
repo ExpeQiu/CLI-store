@@ -1,0 +1,39 @@
+# screen-watch 配置示例
+# 复制为 config.yaml 或 ~/.screen-watch/config.yaml
+
+preset: wechat-live
+
+window:
+  title_contains: "微信"
+  # app_bundle: com.tencent.xinWeChat  # P1 可选
+
+capture:
+  interval_sec: 1.5
+  retina_scale: auto
+
+regions:
+  viewer_count:
+    mode: relative
+    x: 0.02
+    y: 0.03
+    w: 0.18
+    h: 0.06
+    preprocess: [grayscale, scale_2x]
+    extract:
+      pattern: '(\d+(?:\.\d+)?万?)人(?:看过|观看|在线)'
+
+  chat:
+    mode: relative
+    x: 0.68
+    y: 0.10
+    w: 0.30
+    h: 0.60
+    preprocess: [grayscale]
+    diff:
+      mode: line
+      dedup_window: 500
+    filter:
+      drop_prefixes: ["通知:", "系统:"]
+      drop_contains: ["直播公约", "理性消费"]
+    parse:
+      mode: colon_split

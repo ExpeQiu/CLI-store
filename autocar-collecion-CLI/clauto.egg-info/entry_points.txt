@@ -1,0 +1,2 @@
+[console_scripts]
+clauto = clauto.cli:main

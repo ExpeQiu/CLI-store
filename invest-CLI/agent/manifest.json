@@ -1,0 +1,71 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "invest",
+  "version": "2.3.0",
+  "cli": {
+    "command": "invest",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "market-score-demo",
+      "description": "三维共振市场评分（演示）",
+      "cli_template": "invest market score --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30,
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "market-macro-demo",
+      "description": "宏观数据概览（演示）",
+      "cli_template": "invest market macro --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30
+    },
+    {
+      "name": "account-status-demo",
+      "description": "账户状态与市场评分（演示）",
+      "cli_template": "invest account status --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30
+    },
+    {
+      "name": "signal-list-demo",
+      "description": "决策信号列表（演示）",
+      "cli_template": "invest signal list --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60
+    },
+    {
+      "name": "market-score",
+      "description": "三维共振市场评分（实时）",
+      "cli_template": "invest market score --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120
+    },
+    {
+      "name": "trade-buy",
+      "description": "模拟买入（写入 state）",
+      "cli_template": "invest trade buy {code} {shares}",
+      "agent_safe": false,
+      "interactive": false,
+      "human_required": true,
+      "reason": "写入本地投资状态，需用户确认"
+    },
+    {
+      "name": "trade-sell",
+      "description": "模拟卖出（写入 state）",
+      "cli_template": "invest trade sell {code} {shares}",
+      "agent_safe": false,
+      "interactive": false,
+      "human_required": true,
+      "reason": "写入本地投资状态，需用户确认"
+    }
+  ]
+}

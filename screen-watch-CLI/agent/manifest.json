@@ -1,0 +1,42 @@
+{
+  "name": "screen-watch",
+  "version": "0.3.0",
+  "description": "屏幕区域 OCR 直播监控 CLI，主攻微信客户端直播",
+  "entry": "screen-watch",
+  "commands": [
+    {
+      "name": "monitor run",
+      "description": "启动 OCR 监控循环",
+      "agent_safe": true,
+      "supports_demo": true,
+      "options": ["--preset", "--window", "--interval", "--format", "--output", "--demo", "--ocr-engine", "--require-foreground", "--save"]
+    },
+    {
+      "name": "capture once",
+      "description": "单帧截屏 + OCR 调试",
+      "agent_safe": false,
+      "supports_demo": true,
+      "options": ["--region", "--window", "--demo", "--ocr-engine", "--save-crop"]
+    },
+    {
+      "name": "ocr",
+      "description": "对本地图片 OCR",
+      "agent_safe": true,
+      "options": ["--input", "--ocr-engine", "--format"]
+    },
+    {
+      "name": "window list",
+      "description": "列出可绑定窗口",
+      "agent_safe": true
+    },
+    {
+      "name": "calibrate",
+      "description": "截图 + 区域校准",
+      "agent_safe": false,
+      "options": ["--window", "--save-config", "--defaults"]
+    }
+  ],
+  "output_formats": ["json", "jsonl", "table", "text"],
+  "presets": ["wechat-live"],
+  "integrations": ["zhibo-monitor ingest"]
+}

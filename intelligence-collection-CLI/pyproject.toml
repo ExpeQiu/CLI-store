@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intel-collect"
+version = "0.1.0"
+description = "行业情报采集 CLI"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0.0",
+    "httpx>=0.24.0",
+]
+
+[project.scripts]
+intel-collect = "intel_collect.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["intel_collect*"]

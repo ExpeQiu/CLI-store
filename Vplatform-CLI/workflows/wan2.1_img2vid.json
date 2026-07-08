@@ -1,0 +1,141 @@
+{
+  "name": "Wan 2.1 图生视频",
+  "version": "1.0",
+  "profile": "i2v",
+  "description": "关键帧图片 + 运动 prompt 生成视频片段，TTS 时长驱动帧数",
+  "models": {
+    "diffusion": "wan2.1_t2v_1.3B_fp16.safetensors",
+    "clip": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+    "vae": "wan_2.1_vae.safetensors"
+  },
+  "defaults": {
+    "positive_prompt": "slow camera movement, cinematic motion",
+    "negative_prompt": "blurry, low quality, distorted, watermark, artifacts, jitter, flickering",
+    "width": 512,
+    "height": 288,
+    "length": 25,
+    "steps": 10,
+    "cfg": 6.0,
+    "sampler_name": "uni_pc",
+    "scheduler": "simple",
+    "fps": 16,
+    "seed": -1,
+    "image_name": "input.png"
+  },
+  "required_nodes": [
+    "UNETLoader",
+    "CLIPLoader",
+    "VAELoader",
+    "CLIPTextEncode",
+    "LoadImage",
+    "EmptyHunyuanLatentVideo",
+    "KSampler",
+    "VAEDecode",
+    "CreateVideo",
+    "SaveVideo"
+  ],
+  "inject": {
+    "positive_prompt": ["6", "inputs", "text"],
+    "negative_prompt": ["7", "inputs", "text"],
+    "image_name": ["13", "inputs", "image"],
+    "width": ["8", "inputs", "width"],
+    "height": ["8", "inputs", "height"],
+    "length": ["8", "inputs", "length"],
+    "seed": ["9", "inputs", "seed"],
+    "steps": ["9", "inputs", "steps"],
+    "cfg": ["9", "inputs", "cfg"],
+    "sampler_name": ["9", "inputs", "sampler_name"],
+    "scheduler": ["9", "inputs", "scheduler"],
+    "fps": ["11", "inputs", "fps"]
+  },
+  "output_nodes": ["12"],
+  "prompt": {
+    "3": {
+      "class_type": "UNETLoader",
+      "inputs": {
+        "unet_name": "wan2.1_t2v_1.3B_fp16.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    "4": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+        "type": "wan"
+      }
+    },
+    "5": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "wan_2.1_vae.safetensors"
+      }
+    },
+    "6": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "slow camera movement, cinematic motion",
+        "clip": ["4", 0]
+      }
+    },
+    "7": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "blurry, low quality, distorted, watermark, artifacts, jitter, flickering",
+        "clip": ["4", 0]
+      }
+    },
+    "8": {
+      "class_type": "EmptyHunyuanLatentVideo",
+      "inputs": {
+        "width": 512,
+        "height": 288,
+        "length": 25,
+        "batch_size": 1
+      }
+    },
+    "9": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 0,
+        "steps": 10,
+        "cfg": 6.0,
+        "sampler_name": "uni_pc",
+        "scheduler": "simple",
+        "denoise": 1.0,
+        "model": ["3", 0],
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "latent_image": ["8", 0]
+      }
+    },
+    "10": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": ["9", 0],
+        "vae": ["5", 0]
+      }
+    },
+    "11": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": ["10", 0],
+        "fps": 16
+      }
+    },
+    "12": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": ["11", 0],
+        "filename_prefix": "vplatform_wan_i2v",
+        "format": "mp4",
+        "codec": "h264"
+      }
+    },
+    "13": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "input.png"
+      }
+    }
+  }
+}

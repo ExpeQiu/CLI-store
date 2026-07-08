@@ -1,0 +1,2 @@
+[console_scripts]
+github-trend = github_trend.cli:main

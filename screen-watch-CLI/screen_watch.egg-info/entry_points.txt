@@ -1,0 +1,2 @@
+[console_scripts]
+screen-watch = screen_watch.cli:main

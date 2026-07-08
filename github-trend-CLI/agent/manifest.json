@@ -1,0 +1,48 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "github-trend",
+  "version": "0.2.0",
+  "cli": {
+    "command": "github-trend",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "fetch-trending-demo",
+      "description": "GitHub Trending（演示）",
+      "cli_template": "github-trend fetch trending --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30,
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "fetch-trending",
+      "description": "GitHub Trending（实时）",
+      "cli_template": "github-trend fetch trending --since {since} --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "params": {
+        "since": { "type": "string", "enum": ["daily", "weekly", "monthly"], "default": "daily" }
+      }
+    },
+    {
+      "name": "bitable-sync-demo",
+      "description": "同步 GitHub 高星项目到飞书 Bitable（演示模式）",
+      "cli_template": "github-trend bitable sync --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60
+    },
+    {
+      "name": "bitable-sync",
+      "description": "同步 GitHub 高星项目到飞书 Bitable（实时）",
+      "cli_template": "github-trend bitable sync --dry-run --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120
+    }
+  ]
+}

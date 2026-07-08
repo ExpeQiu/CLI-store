@@ -1,0 +1,7 @@
+"""统一退出码"""
+
+EXIT_OK = 0
+EXIT_ERROR = 1
+EXIT_NO_DATA = 2
+EXIT_SCRAPE_FAIL = 3
+EXIT_PERMISSION = 4  # 屏幕录制权限缺失

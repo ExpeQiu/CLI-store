@@ -1,0 +1,6 @@
+2026-07-07 20:53:53,265 [INFO] screen_watch: OCR 引擎: macOS Vision（PaddleOCR 不可用时的回退）
+2026-07-07 20:53:53,276 [INFO] screen_watch: SQLite session=1 path=logs/screen-watch.db
+2026-07-07 20:53:53,276 [INFO] screen_watch: 启动 OCR 监控 preset=wechat-live window=微信 interval=1.5s regions=['viewer_count', 'chat']
+2026-07-07 20:54:30,751 [INFO] screen_watch: OCR 引擎: macOS Vision（PaddleOCR 不可用时的回退）
+2026-07-07 20:54:30,761 [INFO] screen_watch: SQLite session=2 path=logs/screen-watch.db
+2026-07-07 20:54:30,761 [INFO] screen_watch: 启动 OCR 监控 preset=wechat-live window=微信 interval=1.5s regions=['viewer_count', 'chat']

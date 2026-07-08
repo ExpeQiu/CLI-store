@@ -1,0 +1,1 @@
+"""GitHub Trend CLI"""
