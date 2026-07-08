@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+
+# 环境变量与密钥
+.env
+
+# 日志与运行时
+*.log
+logs/
+*.pid
+
+# 本地数据
+*.db
+*_state.json
+.DS_Store
+._*
+
+# macOS / IDE
+.idea/
+.vscode/

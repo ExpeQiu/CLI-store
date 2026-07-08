@@ -1,0 +1,49 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "zhibo-monitor",
+  "version": "0.1.0",
+  "cli": {
+    "command": "zhibo-monitor",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "init-db",
+      "description": "初始化数据库表结构",
+      "cli_template": "zhibo-monitor init-db",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60
+    },
+    {
+      "name": "start-demo",
+      "description": "监控任务配置预览（演示）",
+      "cli_template": "zhibo-monitor start {platform} {room_id} --demo",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 10,
+      "params": {
+        "platform": { "type": "string", "default": "bilibili" },
+        "room_id": { "type": "string", "default": "22603245" }
+      }
+    },
+    {
+      "name": "monitor-live",
+      "description": "启动直播间监控（长任务）",
+      "cli_template": "zhibo-monitor start {platform} {room_id}",
+      "agent_safe": "background_only",
+      "interactive": false,
+      "timeout_sec": 0,
+      "spawn_hint": "cron | nohup"
+    },
+    {
+      "name": "login",
+      "description": "平台扫码登录",
+      "cli_template": "zhibo-monitor login {platform}",
+      "agent_safe": false,
+      "interactive": true,
+      "human_required": true
+    }
+  ]
+}

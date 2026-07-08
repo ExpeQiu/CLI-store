@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "social-monitor"
+version = "1.0.0"
+description = "轻量级社交媒体监控命令行工具"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0.0",
+    "httpx>=0.24.0",
+    "feedparser>=6.0.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg2-binary>=2.9.0"]
+mysql = ["pymysql>=1.0.0"]
+browser = ["playwright>=1.30.0"]
+live = ["websockets>=12.0", "brotli>=1.0.0"]
+dev = ["pytest>=7.0.0"]
+
+[project.scripts]
+social-monitor = "social_monitor.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["social_monitor*"]

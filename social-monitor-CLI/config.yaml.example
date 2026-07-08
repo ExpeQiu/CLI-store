@@ -1,0 +1,51 @@
+weibo:
+  cookie: ""          # 可选，也可写入 ~/.social-monitor/cookies/weibo.txt 或 SM_WEIBO_COOKIE
+
+xiaohongshu:
+  cookie: ""          # 推荐: social-monitor config login xiaohongshu
+
+douyin:
+  cookie: ""
+
+zhihu:
+  cookie: ""
+
+rsshub_url: "http://localhost:1200"
+feishu_webhook: ""
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+
+storage:
+  type: postgres          # postgres | json | mysql
+  data_dir: "~/.social-monitor/data"   # type=json 时使用
+
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  database: social_monitor
+
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  password: ""
+  database: social_monitor
+
+# Cookie 优先级: CLI --cookie > 环境变量 > cookies/*.txt > 本文件
+# 环境变量: SM_WEIBO_COOKIE, SM_XIAOHONGSHU_COOKIE, SM_DOUYIN_COOKIE, SM_ZHIHU_COOKIE
+
+rate_limit:
+  mode: safe          # safe: 10~20s | normal: 2~3s
+  min_interval: 10
+  max_interval: 20
+  daily_max_requests: 80
+  stop_on_403: true
+
+monitor:
+  feishu_on_diff: true
+  skip_on_check_fail: true

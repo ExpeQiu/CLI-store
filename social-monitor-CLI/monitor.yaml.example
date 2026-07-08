@@ -1,0 +1,60 @@
+# 监控任务配置 — 复制到 ~/.social-monitor/monitor.yaml 后按需修改
+
+# 全局采集路径覆盖（可选）
+# 值: social_monitor | octopus
+routes:
+  douyin:live_danmaku: octopus          # 固定 Octopus，勿改
+  # xiaohongshu:topic_search: octopus   # 小红书反爬重时可开启
+  # douyin:comments: octopus            # 抖音评论 sm 失败时可切换
+
+# Octopus 全局配置（可选）
+octopus:
+  cli: octopus
+  templates:
+    douyin:live_danmaku: douyin-live-danmaku
+    douyin:comments: douyin-comments
+    xiaohongshu:topic_search: xhs-keyword-search
+    xiaohongshu:comments: xhs-comments
+
+weibo:
+  accounts: []                    # 微博 UID 列表，如 ["1974576991"]
+  trending:
+    enabled: true
+    time: "08:00"
+  pages: 1                        # 每账号每日抓取页数
+  # routes:
+  #   user_timeline: social_monitor
+
+wechat:
+  accounts: []                    # 公众号 biz/wxid
+  time: "09:00"
+
+bilibili:
+  accounts: []                    # UP 主 UID，如 [614946423]
+  live_rooms: []                  # 直播间 room_id
+  video_danmaku: true             # 新视频自动采弹幕词云
+  comments_limit: 20
+  time: "10:00"
+
+douyin:
+  accounts: []                    # sec_uid 列表
+  comments: false                 # 新视频评论（可按 routes 切 Octopus）
+  live_rooms: []                  # 抖音直播间（Octopus 采集）
+  octopus_cli: octopus            # Octopus CLI 可执行名（兼容旧配置）
+  octopus_live_template: douyin-live-danmaku
+  time: "11:00"
+  # routes:
+  #   comments: octopus
+  # octopus_templates:
+  #   comments: douyin-comments
+
+xiaohongshu:
+  topics: []                      # 关键词，如 ["新能源汽车"]
+  users: []                       # 可选：指定用户 ID（topics 为空时使用）
+  notes_per_topic: 20
+  comments_per_note: 20
+  mode: browser
+  time: "12:00"
+  # routes:
+  #   topic_search: octopus
+  #   comments: octopus

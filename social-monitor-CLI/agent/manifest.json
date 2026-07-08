@@ -1,0 +1,111 @@
+{
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
+  "name": "social-monitor",
+  "version": "1.0.0",
+  "cli": {
+    "command": "social-monitor",
+    "install": "pip install -e .",
+    "verify": "./verify.sh"
+  },
+  "commands": [
+    {
+      "name": "fetch-weibo-trending",
+      "description": "采集微博热搜榜",
+      "cli_template": "social-monitor fetch weibo-trending --count {count} --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "params": {
+        "count": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "热搜条数"
+        }
+      },
+      "output": {
+        "format": "json",
+        "schema_ref": "#/definitions/weibo_trending_response"
+      },
+      "exit_codes": {
+        "0": "success",
+        "2": "no_data",
+        "3": "scrape_failed"
+      }
+    },
+    {
+      "name": "fetch-douyin-trending",
+      "description": "采集抖音热榜",
+      "cli_template": "social-monitor fetch douyin-trending --count {count} --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "params": {
+        "count": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }
+      },
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "fetch-zhihu-trending",
+      "description": "采集知乎热榜",
+      "cli_template": "social-monitor fetch zhihu-trending --count {count} --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "params": {
+        "count": { "type": "integer", "default": 20, "minimum": 1, "maximum": 50 }
+      },
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "intel-trending",
+      "description": "批量热榜增量对比",
+      "cli_template": "social-monitor intel trending --diff --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 300,
+      "exit_codes": { "0": "success", "3": "scrape_failed" }
+    },
+    {
+      "name": "monitor-live",
+      "description": "直播开播检测与采集（长任务）",
+      "cli_template": "social-monitor monitor run --task live",
+      "agent_safe": "background_only",
+      "interactive": false,
+      "timeout_sec": 0,
+      "spawn_hint": "sessions_spawn | cron | nohup",
+      "reason": "阻塞式长任务，禁止 Agent 前台同步等待"
+    },
+    {
+      "name": "config-login-xiaohongshu",
+      "description": "浏览器扫码登录小红书",
+      "cli_template": "social-monitor config login xiaohongshu",
+      "agent_safe": false,
+      "interactive": true,
+      "human_required": true,
+      "reason": "需要人工扫码确认"
+    }
+  ],
+  "definitions": {
+    "weibo_trending_response": {
+      "type": "object",
+      "required": ["module", "data_source", "items"],
+      "properties": {
+        "module": { "const": "weibo-trending" },
+        "data_source": { "enum": ["live", "demo", "cache"] },
+        "count": { "type": "integer" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "word": { "type": "string" },
+              "hot_value": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
