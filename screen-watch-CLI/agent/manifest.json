@@ -1,42 +1,143 @@
 {
+  "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
   "name": "screen-watch",
   "version": "0.3.0",
-  "description": "屏幕区域 OCR 直播监控 CLI，主攻微信客户端直播",
-  "entry": "screen-watch",
+  "description": "屏幕区域 OCR 直播监控 CLI，主攻微信 Mac 客户端直播",
+  "cli": {
+    "command": "screen-watch",
+    "install": "pip install -e \".[capture,dev]\"",
+    "verify": "./verify.sh"
+  },
   "commands": [
     {
-      "name": "monitor run",
-      "description": "启动 OCR 监控循环",
+      "name": "monitor-run-demo",
+      "description": "OCR 监控循环（演示数据，离线验收）",
+      "cli_template": "screen-watch monitor run --demo --format json",
       "agent_safe": true,
-      "supports_demo": true,
-      "options": ["--preset", "--window", "--interval", "--format", "--output", "--demo", "--ocr-engine", "--require-foreground", "--save"]
+      "interactive": false,
+      "timeout_sec": 30,
+      "output": {
+        "format": "json",
+        "schema_ref": "#/definitions/monitor_run_response"
+      },
+      "exit_codes": {
+        "0": "success",
+        "1": "error"
+      }
     },
     {
-      "name": "capture once",
-      "description": "单帧截屏 + OCR 调试",
+      "name": "monitor-run-live",
+      "description": "OCR 监控循环（微信客户端直播，长任务）",
+      "cli_template": "screen-watch monitor run --window {window} --format jsonl --interval {interval}",
+      "agent_safe": "background_only",
+      "interactive": false,
+      "timeout_sec": 0,
+      "spawn_hint": "cron | nohup | SIM event-live-screen",
+      "params": {
+        "window": {
+          "type": "string",
+          "default": "微信",
+          "description": "macOS 窗口标题过滤"
+        },
+        "interval": {
+          "type": "number",
+          "default": 1.5,
+          "description": "截屏 OCR 间隔（秒）"
+        }
+      },
+      "reason": "阻塞式长任务，需屏幕录制权限"
+    },
+    {
+      "name": "pipeline-zhibo",
+      "description": "screen-watch JSONL → zhibo-monitor ingest 管道",
+      "cli_template": "./scripts/pipeline-zhibo.sh",
+      "agent_safe": "background_only",
+      "interactive": false,
+      "timeout_sec": 0,
+      "spawn_hint": "nohup | SIM event-live (platform=sph-client)",
+      "reason": "管道长任务，与 zhibo-monitor 联合入库"
+    },
+    {
+      "name": "capture-once-demo",
+      "description": "单帧截屏 OCR 调试（演示）",
+      "cli_template": "screen-watch capture once --region viewer_count --demo --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60
+    },
+    {
+      "name": "capture-once",
+      "description": "单帧截屏 OCR（需屏幕录制权限）",
+      "cli_template": "screen-watch capture once --region {region} --window {window} --format json",
       "agent_safe": false,
-      "supports_demo": true,
-      "options": ["--region", "--window", "--demo", "--ocr-engine", "--save-crop"]
+      "interactive": true,
+      "human_required": true,
+      "params": {
+        "region": { "type": "string", "default": "viewer_count" },
+        "window": { "type": "string", "default": "微信" }
+      },
+      "reason": "需 macOS 屏幕录制权限"
     },
     {
-      "name": "ocr",
-      "description": "对本地图片 OCR",
-      "agent_safe": true,
-      "options": ["--input", "--ocr-engine", "--format"]
-    },
-    {
-      "name": "window list",
+      "name": "window-list",
       "description": "列出可绑定窗口",
-      "agent_safe": true
+      "cli_template": "screen-watch window list --filter {filter}",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 30,
+      "params": {
+        "filter": { "type": "string", "default": "微信" }
+      }
+    },
+    {
+      "name": "ocr-image",
+      "description": "对本地图片 OCR",
+      "cli_template": "screen-watch ocr --input {input} --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60,
+      "params": {
+        "input": { "type": "string", "description": "图片路径" }
+      }
     },
     {
       "name": "calibrate",
-      "description": "截图 + 区域校准",
+      "description": "区域校准并保存 config",
+      "cli_template": "screen-watch calibrate --window {window} --save-config config.yaml --defaults",
       "agent_safe": false,
-      "options": ["--window", "--save-config", "--defaults"]
+      "interactive": true,
+      "human_required": true,
+      "params": {
+        "window": { "type": "string", "default": "微信" }
+      },
+      "reason": "需人工确认截屏区域"
     }
   ],
-  "output_formats": ["json", "jsonl", "table", "text"],
-  "presets": ["wechat-live"],
-  "integrations": ["zhibo-monitor ingest"]
+  "definitions": {
+    "monitor_run_response": {
+      "type": "object",
+      "required": ["module", "data_source", "preset", "events"],
+      "properties": {
+        "module": { "const": "monitor-run" },
+        "data_source": { "enum": ["live", "demo", "cache"] },
+        "preset": { "type": "string" },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "enum": ["metric", "chat", "status"] }
+            }
+          }
+        }
+      }
+    }
+  },
+  "integrations": [
+    {
+      "target": "zhibo-monitor",
+      "command": "zhibo-monitor ingest",
+      "platform": "sph-client"
+    }
+  ]
 }

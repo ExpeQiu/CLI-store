@@ -24,9 +24,13 @@ clauto.egg-info/requires.txt
 clauto.egg-info/top_level.txt
 clauto/intel/__init__.py
 clauto/intel/bitable.py
+clauto/intel/collect.py
 clauto/intel/config.py
 clauto/intel/db.py
 clauto/intel/gap_analysis.py
 clauto/intel/migrate.py
+clauto/intel/repository.py
+clauto/intel/signals.py
 clauto/parsers/__init__.py
 clauto/parsers/autohome.py
+tests/test_intel_signals.py

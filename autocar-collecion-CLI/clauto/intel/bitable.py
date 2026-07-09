@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -17,6 +17,7 @@ from clauto.intel.config import (
     FEISHU_INTEL_TABLE_ID,
 )
 from clauto.intel import db
+from clauto.intel.repository import upsert_pre_launch
 
 logger = logging.getLogger("clauto.intel.bitable")
 
@@ -122,67 +123,6 @@ def map_record_fields(fields: dict[str, Any]) -> dict[str, str | None]:
             continue
         mapped[pg_col] = _unwrap_field(raw)
     return mapped
-
-
-def _parse_launch_date(raw: str | None) -> date | None:
-    if not raw or raw == "0":
-        return None
-    if raw.isdigit():
-        n = int(raw)
-        if n > 1_000_000_000_000:
-            return datetime.utcfromtimestamp(n / 1000).date()
-        if n > 1_000_000_000:
-            return datetime.utcfromtimestamp(n).date()
-    try:
-        return datetime.strptime(raw[:10], "%Y-%m-%d").date()
-    except ValueError:
-        return None
-
-
-def upsert_pre_launch(record_id: str, row: dict[str, str | None]) -> str:
-    """INSERT or UPDATE by record_id. Returns 'created' | 'updated'."""
-    cols = ["record_id"] + [k for k in row if k != "record_id"]
-    values = [record_id] + [row.get(c) for c in cols[1:]]
-
-    launch_raw = row.get("预计发布日期")
-    launch_norm = _parse_launch_date(launch_raw)
-
-    with db.get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id FROM intel_pre_launch WHERE record_id = %s",
-                (record_id,),
-            )
-            exists = cur.fetchone()
-            if exists:
-                set_parts = []
-                params: list[Any] = []
-                for c in cols[1:]:
-                    set_parts.append(f'"{c}" = %s')
-                    params.append(row.get(c))
-                if launch_norm:
-                    set_parts.append("预计发布日期_norm = %s")
-                    params.append(launch_norm)
-                set_parts.append("updated_at = CURRENT_TIMESTAMP")
-                params.append(record_id)
-                cur.execute(
-                    f'UPDATE intel_pre_launch SET {", ".join(set_parts)} WHERE record_id = %s',
-                    params,
-                )
-                return "updated"
-
-            insert_cols = cols.copy()
-            insert_vals = values.copy()
-            if launch_norm:
-                insert_cols.append("预计发布日期_norm")
-                insert_vals.append(launch_norm)
-            placeholders = ", ".join(["%s"] * len(insert_vals))
-            col_names = ", ".join(f'"{c}"' for c in insert_cols)
-            cur.execute(
-                f"INSERT INTO intel_pre_launch ({col_names}) VALUES ({placeholders})",
-                insert_vals,
-            )
-            return "created"
 
 
 def sync_from_bitable(*, dry_run: bool = False, demo: bool = False) -> dict[str, int]:

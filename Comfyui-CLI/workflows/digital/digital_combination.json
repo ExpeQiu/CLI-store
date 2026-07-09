@@ -1,0 +1,14 @@
+{
+  "name": "数字人口播合成",
+  "version": "1.0",
+  "category": "digital",
+  "capability": "lip_sync",
+  "source": "runninghub",
+  "workflow_id": "2003717471859294210",
+  "description": "人物图 + 音频 → 口播视频（lip sync）",
+  "defaults": {},
+  "inject": {
+    "videoimage": { "type": "image", "required": true, "description": "人物/合成图" },
+    "audio": { "type": "audio", "required": true, "description": "口播音频" }
+  }
+}

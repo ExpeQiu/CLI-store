@@ -1,0 +1,23 @@
+pipeline:
+  frame_rate: 30
+  breath_gap_sec: 0.4
+  pre_cut_buffer: 0.1
+  post_cut_buffer: 0.1
+  silence_threshold_db: -40
+  min_keep_sec: 0.3
+
+transcribe:
+  model: base
+  language: zh
+  word_timestamps: true
+  device: auto
+
+align:
+  match_threshold: 0.55
+  use_llm_review: false
+  llm_model: gpt-4o-mini
+
+export:
+  fcpxml_version: "1.11"
+  include_srt: true
+  media_path_style: absolute

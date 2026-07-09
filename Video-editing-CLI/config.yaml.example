@@ -1,0 +1,37 @@
+pipeline:
+  frame_rate: 30
+  breath_gap_sec: 0.4
+  pre_cut_buffer: 0.1
+  post_cut_buffer: 0.1
+  silence_threshold_db: -40
+  min_keep_sec: 0.3
+  long_pause_sec: 1.5
+
+transcribe:
+  model: base
+  language: zh
+  word_timestamps: true
+  device: auto
+  use_whisperx_align: false   # true 需 pip install -e ".[whisperx]"
+
+align:
+  match_threshold: 0.55
+  ambiguous_low: 0.40
+  use_llm_review: false       # true 需 OPENAI_API_KEY
+  llm_model: gpt-4o-mini
+  # openai_base_url: https://api.openai.com/v1
+
+export:
+  fcpxml_version: "1.11"
+  include_srt: true
+  media_path_style: absolute
+  formats: [fcpxml, edl, srt]
+
+multicam:
+  enabled: false
+  sample_rate: 800
+  max_lag_sec: 30.0
+
+batch:
+  max_concurrent: 1
+  auto_resume: true

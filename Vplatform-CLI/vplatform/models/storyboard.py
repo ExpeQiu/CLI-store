@@ -34,6 +34,8 @@ class StoryboardFrame(BaseModel):
     motion_prompt: str = ""
     negative_prompt: str = "blurry, low quality, distorted, watermark, artifacts"
     duration_sec: float | None = None
+    render_mode: str = "i2v"  # i2v | ken_burns
+    shot_type: str = "key"  # key | transition
     audio: AudioResult | None = None
     keyframe_path: str | None = None
     clip_path: str | None = None

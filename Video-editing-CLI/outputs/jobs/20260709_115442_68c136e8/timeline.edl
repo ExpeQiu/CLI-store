@@ -1,0 +1,18 @@
+TITLE: A-Roll Edit
+FCM: NON-DROP FRAME
+
+001  DEMO_SOU V     C        00:00:07:24 00:00:10:01 00:00:00:00 00:00:02:07
+* FROM CLIP NAME: demo_source.mp4
+* 句1
+
+002  DEMO_SOU V     C        00:00:11:24 00:00:14:04 00:00:02:07 00:00:04:18
+* FROM CLIP NAME: demo_source.mp4
+* 句2
+
+003  DEMO_SOU V     C        00:00:18:12 00:00:20:12 00:00:04:18 00:00:06:18
+* FROM CLIP NAME: demo_source.mp4
+* 句3
+
+004  DEMO_SOU V     C        00:00:25:07 00:00:27:05 00:00:06:18 00:00:08:15
+* FROM CLIP NAME: demo_source.mp4
+* 句4

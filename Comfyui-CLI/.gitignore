@@ -1,0 +1,15 @@
+# 环境
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# 配置与产物
+config.yaml
+outputs/
+logs/
+data/workflows/*.json
+
+# macOS
+.DS_Store
+._*

@@ -1,0 +1,90 @@
+{
+  "source_video": "outputs/20260709_114733_bca90185/demo_source.mp4",
+  "frame_rate": 30.0,
+  "total_source_sec": 42.0,
+  "total_output_sec": 8.500000000000005,
+  "retain_ratio": 0.2024,
+  "clips": [
+    {
+      "id": "cut_001",
+      "action": "cut",
+      "source_in": 0.0,
+      "source_out": 7.800000000000001,
+      "script_ref": "",
+      "reason": "mistake_retake"
+    },
+    {
+      "id": "clip_001",
+      "action": "keep",
+      "source_in": 7.800000000000001,
+      "source_out": 10.049999999999999,
+      "script_ref": "句1",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_002",
+      "action": "cut",
+      "source_in": 10.049999999999999,
+      "source_out": 11.8,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_002",
+      "action": "keep",
+      "source_in": 11.8,
+      "source_out": 14.149999999999999,
+      "script_ref": "句2",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_003",
+      "action": "cut",
+      "source_in": 14.149999999999999,
+      "source_out": 18.4,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_003",
+      "action": "keep",
+      "source_in": 18.4,
+      "source_out": 20.400000000000002,
+      "script_ref": "句3",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_004",
+      "action": "cut",
+      "source_in": 20.400000000000002,
+      "source_out": 25.249999999999996,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_004",
+      "action": "keep",
+      "source_in": 25.249999999999996,
+      "source_out": 27.150000000000002,
+      "script_ref": "句4",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_005",
+      "action": "cut",
+      "source_in": 27.150000000000002,
+      "source_out": 42.0,
+      "script_ref": "",
+      "reason": "trailing_unused"
+    }
+  ],
+  "stats": {
+    "cuts": 5,
+    "kept_clips": 4,
+    "breath_gaps_applied": 3,
+    "duplicate_takes": 4,
+    "mistake_retakes": 2,
+    "long_pauses": 0,
+    "llm_reviews": 0
+  }
+}

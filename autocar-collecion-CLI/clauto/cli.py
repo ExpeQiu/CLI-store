@@ -146,6 +146,33 @@ def cmd_intel_backfill(args) -> int:
     return EXIT_OK
 
 
+def cmd_intel_collect(args) -> int:
+    from clauto.intel.collect import run_collect
+
+    sources = [s.strip() for s in args.sources.split(",") if s.strip()] if args.sources else None
+    watch: list[tuple[str, str]] = []
+    if args.watch:
+        for pair in args.watch:
+            parts = pair.split(",", 1)
+            if len(parts) == 2:
+                watch.append((parts[0].strip(), parts[1].strip()))
+
+    result = run_collect(
+        sources=sources,
+        demo=args.demo,
+        dry_run=args.dry_run,
+        miit_days=args.miit_days,
+        news_max=args.news_max,
+        watch=watch or None,
+    )
+    if args.format == "json":
+        import json
+        _output(args, json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        _output(args, f"collect 结果: {result}\n")
+    return EXIT_OK
+
+
 def cmd_intel_sync_bitable(args) -> int:
     from clauto.intel.bitable import sync_from_bitable
 
@@ -300,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
     _add_common_args(mon_p)
 
     intel_p = subparsers.add_parser(
-        "intel", help="情报层：PG 迁移 / Bitable 同步 / 技术空白分析",
+        "intel", help="情报层：PG 直写采集 / 迁移 / 技术空白分析",
     )
     intel_sub = intel_p.add_subparsers(dest="intel_command")
 
@@ -311,7 +338,31 @@ def main(argv: list[str] | None = None) -> int:
     bf_p = intel_sub.add_parser("backfill", help="从 focus_vehicles/post_launch 重新回填")
     _add_common_args(bf_p)
 
-    sync_p = intel_sub.add_parser("sync-bitable", help="从飞书 Bitable 同步到 intel_pre_launch")
+    col_p = intel_sub.add_parser(
+        "collect",
+        help="miit/news 抓取信号直写 intel_pre_launch（默认路径，不经过 Bitable）",
+    )
+    col_p.add_argument(
+        "--sources",
+        type=str,
+        default="miit,news",
+        help="采集源，逗号分隔: miit,news（默认 miit,news）",
+    )
+    col_p.add_argument("--miit-days", type=int, default=7, help="工信部公告回溯天数")
+    col_p.add_argument("--news-max", type=int, default=20, help="每个新闻源最大条数")
+    col_p.add_argument(
+        "--watch",
+        action="append",
+        metavar="BRAND,MODEL",
+        help="汽车之家 enrich：品牌,车型（可重复）",
+    )
+    col_p.add_argument("--dry-run", action="store_true")
+    _add_common_args(col_p)
+
+    sync_p = intel_sub.add_parser(
+        "sync-bitable",
+        help="[legacy] 从飞书 Bitable 同步到 intel_pre_launch",
+    )
     sync_p.add_argument("--dry-run", action="store_true")
     _add_common_args(sync_p)
 
@@ -333,6 +384,7 @@ def main(argv: list[str] | None = None) -> int:
         intel_handlers = {
             "migrate": cmd_intel_migrate,
             "backfill": cmd_intel_backfill,
+            "collect": cmd_intel_collect,
             "sync-bitable": cmd_intel_sync_bitable,
             "bitable-fields": cmd_intel_bitable_fields,
             "gap-analysis": cmd_intel_gap,

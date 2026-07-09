@@ -1,0 +1,126 @@
+{
+  "name": "Z-Image-Turbo 文生图",
+  "version": "1.0",
+  "category": "image",
+  "capability": "t2i",
+  "source": "local",
+  "profile": "fast",
+  "description": "Z-Image-Turbo 快速文生图，9 步采样",
+  "models": {
+    "diffusion": "z_image_turbo_bf16.safetensors",
+    "clip": "qwen_3_4b.safetensors",
+    "vae": "ae.safetensors"
+  },
+  "defaults": {
+    "positive_prompt": "A fresh red apple on white background, studio lighting, product photography, sharp focus",
+    "width": 768,
+    "height": 768,
+    "steps": 9,
+    "cfg": 1.0,
+    "sampler_name": "res_multistep",
+    "scheduler": "simple",
+    "seed": -1
+  },
+  "required_nodes": [
+    "UNETLoader",
+    "CLIPLoader",
+    "VAELoader",
+    "CLIPTextEncode",
+    "ConditioningZeroOut",
+    "ModelSamplingAuraFlow",
+    "EmptySD3LatentImage",
+    "KSampler",
+    "VAEDecode",
+    "SaveImage"
+  ],
+  "inject": {
+    "positive_prompt": ["45", "inputs", "text"],
+    "width": ["41", "inputs", "width"],
+    "height": ["41", "inputs", "height"],
+    "seed": ["44", "inputs", "seed"],
+    "steps": ["44", "inputs", "steps"],
+    "cfg": ["44", "inputs", "cfg"],
+    "sampler_name": ["44", "inputs", "sampler_name"],
+    "scheduler": ["44", "inputs", "scheduler"]
+  },
+  "output_nodes": ["9"],
+  "prompt": {
+    "46": {
+      "class_type": "UNETLoader",
+      "inputs": {
+        "unet_name": "z_image_turbo_bf16.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    "39": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen_3_4b.safetensors",
+        "type": "lumina2"
+      }
+    },
+    "40": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "ae.safetensors"
+      }
+    },
+    "47": {
+      "class_type": "ModelSamplingAuraFlow",
+      "inputs": {
+        "model": ["46", 0],
+        "shift": 3.0
+      }
+    },
+    "45": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "A fresh red apple on white background, studio lighting, product photography, sharp focus",
+        "clip": ["39", 0]
+      }
+    },
+    "42": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": ["45", 0]
+      }
+    },
+    "41": {
+      "class_type": "EmptySD3LatentImage",
+      "inputs": {
+        "width": 768,
+        "height": 768,
+        "batch_size": 1
+      }
+    },
+    "44": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 0,
+        "steps": 9,
+        "cfg": 1.0,
+        "sampler_name": "res_multistep",
+        "scheduler": "simple",
+        "denoise": 1.0,
+        "model": ["47", 0],
+        "positive": ["45", 0],
+        "negative": ["42", 0],
+        "latent_image": ["41", 0]
+      }
+    },
+    "43": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": ["44", 0],
+        "vae": ["40", 0]
+      }
+    },
+    "9": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": ["43", 0],
+        "filename_prefix": "cli_z_image_t2i"
+      }
+    }
+  }
+}

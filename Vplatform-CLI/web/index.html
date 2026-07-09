@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vplatform-CLI 控制台</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2a2f3d;
+      --text: #e8eaed;
+      --muted: #9aa0b0;
+      --accent: #5b8def;
+      --ok: #3dd68c;
+      --err: #f07178;
+      --warn: #ebc06d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 0.875rem; margin-bottom: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    button {
+      margin-top: 14px;
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted);
+    }
+    .dot.ok { background: var(--ok); }
+    .dot.err { background: var(--err); }
+    .progress {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+    .progress > div {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .meta { font-size: 0.85rem; color: var(--muted); }
+    .meta strong { color: var(--text); }
+    .outputs { margin-top: 12px; }
+    .outputs a {
+      display: block;
+      color: var(--accent);
+      font-size: 0.85rem;
+      word-break: break-all;
+      margin-top: 4px;
+    }
+    .error-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(240, 113, 120, 0.12);
+      color: var(--err);
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
+    .hidden { display: none; }
+    .stage-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background: var(--border);
+      color: var(--text);
+    }
+    .stage-tag.done { background: rgba(61, 214, 140, 0.2); color: var(--ok); }
+    .stage-tag.fail { background: rgba(240, 113, 120, 0.2); color: var(--err); }
+    .preview-box {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .preview-box video {
+      width: 100%;
+      max-height: 420px;
+      border-radius: 8px;
+      background: #000;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .preview-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .preview-actions a {
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .preview-actions a:hover { text-decoration: underline; }
+    .preview-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .storyboard-box {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .storyboard-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 10px;
+    }
+    .frame-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+    }
+    .frame-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .frame-index {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(91, 141, 239, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .frame-narration {
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+    .prompt-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin: 6px 0 2px;
+    }
+    .prompt-text {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .frame-thumb {
+      width: 100%;
+      max-height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Vplatform-CLI 控制台</h1>
+    <p class="sub">分镜短视频流水线 · 主题输入 + 任务轮询</p>
+
+    <div class="card">
+      <div class="status-bar">
+        <span class="dot" id="healthDot"></span>
+        <span id="healthText">检查服务中…</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="subject">视频主题</label>
+      <input id="subject" type="text" placeholder="例如：智能电动车产品展示" />
+
+      <div class="row">
+        <div>
+          <label for="stopAt">执行阶段</label>
+          <select id="stopAt">
+            <option value="storyboard">分镜 storyboard</option>
+            <option value="tts">配音 tts</option>
+            <option value="keyframe">关键帧 keyframe</option>
+            <option value="i2v">图生视频 i2v</option>
+            <option value="concat">拼接 concat</option>
+            <option value="subtitle">字幕 subtitle</option>
+            <option value="final" selected>成片 final</option>
+          </select>
+        </div>
+        <div>
+          <label for="profile">画质预设</label>
+          <select id="profile">
+            <option value="fast" selected>fast（512×288）</option>
+            <option value="default">default（832×480）</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="submitBtn" type="button">开始生成</button>
+    </div>
+
+    <div class="card hidden" id="taskCard">
+      <div class="meta">
+        任务 <strong id="taskId">—</strong>
+        · 阶段 <span class="stage-tag" id="stageTag">—</span>
+      </div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div class="meta" id="progressText">等待中…</div>
+      <div class="outputs hidden" id="outputsBox">
+        <label>产物</label>
+        <div id="outputsList"></div>
+      </div>
+      <div class="error-box hidden" id="errorBox"></div>
+      <div class="storyboard-box hidden" id="storyboardBox">
+        <label>分镜脚本</label>
+        <p class="storyboard-title" id="storyboardTitle"></p>
+        <div id="storyboardFrames"></div>
+      </div>
+      <div class="preview-box hidden" id="previewBox">
+        <label>成片预览</label>
+        <video id="previewVideo" controls playsinline preload="metadata"></video>
+        <div class="preview-actions">
+          <a id="previewOpen" href="#" target="_blank" rel="noopener">新窗口打开</a>
+          <a id="previewDownload" href="#" download>下载视频</a>
+        </div>
+        <p class="preview-hint" id="previewHint"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let pollTimer = null;
+    const TERMINAL = new Set(["final", "failed", "cancelled"]);
+
+    function toOutputUrl(path) {
+      if (!path) return null;
+      const m = String(path).match(/outputs[/\\](.+)$/);
+      return m ? `/outputs/${m[1].replace(/\\/g, "/")}` : null;
+    }
+
+    async function probeOutputUrl(taskId, filename) {
+      const url = `/outputs/${taskId}/${filename}`;
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        return res.ok ? url : null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function resolveSubtitleTrack(task) {
+      const taskId = task.task_id;
+      if (!taskId) return null;
+
+      const vttUrl = await probeOutputUrl(taskId, "subtitles.vtt");
+      if (vttUrl) return vttUrl;
+
+      const srtUrl = await probeOutputUrl(taskId, "subtitles.srt");
+      if (!srtUrl) return null;
+
+      try {
+        const res = await fetch(srtUrl);
+        if (!res.ok) return null;
+        const vtt = "WEBVTT\n\n" + (await res.text()).replace(
+          /(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2"
+        );
+        return URL.createObjectURL(new Blob([vtt], { type: "text/vtt" }));
+      } catch {
+        return null;
+      }
+    }
+
+    function attachSubtitleTrack(video, trackUrl) {
+      video.querySelectorAll("track").forEach((t) => t.remove());
+      if (!trackUrl) return;
+      const track = document.createElement("track");
+      track.kind = "subtitles";
+      track.label = "中文";
+      track.srclang = "zh";
+      track.default = true;
+      track.src = trackUrl;
+      video.appendChild(track);
+      track.addEventListener("load", () => {
+        const tt = video.textTracks;
+        for (let i = 0; i < tt.length; i++) tt[i].mode = "showing";
+      });
+      setTimeout(() => {
+        const tt = video.textTracks;
+        for (let i = 0; i < tt.length; i++) tt[i].mode = "showing";
+      }, 300);
+    }
+
+    function pickPreviewUrl(task) {
+      const outputs = task.outputs || {};
+      const candidates = [
+        outputs.final,
+        outputs.concat,
+        outputs.muxed,
+      ];
+      for (const path of candidates) {
+        const url = toOutputUrl(path);
+        if (url) return { url, kind: path.includes("final") ? "final" : path.includes("concat") ? "concat" : "muxed" };
+      }
+      return null;
+    }
+
+    async function resolveStoryboardUrl(task) {
+      const outputs = task.outputs || {};
+      const fromOutput = toOutputUrl(outputs.storyboard);
+      if (fromOutput) return fromOutput;
+      if (task.task_id) return probeOutputUrl(task.task_id, "storyboard.json");
+      return null;
+    }
+
+    function renderStoryboard(sb) {
+      const box = $("storyboardBox");
+      if (!sb?.frames?.length) {
+        box.classList.add("hidden");
+        return;
+      }
+      box.classList.remove("hidden");
+      $("storyboardTitle").textContent = sb.title || "未命名";
+      $("storyboardFrames").innerHTML = sb.frames.map((f) => {
+        const thumb = f.keyframe_path ? toOutputUrl(f.keyframe_path) : null;
+        const parts = [
+          `<div class="frame-card">`,
+          `<div class="frame-head"><span class="frame-index">镜 ${(f.index ?? 0) + 1}</span>`,
+          f.duration_sec != null ? `<span class="meta">${f.duration_sec.toFixed(1)}s</span>` : "",
+          `</div>`,
+          f.narration ? `<div class="frame-narration">${escapeHtml(f.narration)}</div>` : "",
+          f.image_prompt ? `<div class="prompt-label">画面词 image_prompt</div><div class="prompt-text">${escapeHtml(f.image_prompt)}</div>` : "",
+          f.motion_prompt ? `<div class="prompt-label">运动词 motion_prompt</div><div class="prompt-text">${escapeHtml(f.motion_prompt)}</div>` : "",
+          thumb ? `<img class="frame-thumb" src="${thumb}" alt="关键帧 ${(f.index ?? 0) + 1}" loading="lazy" />` : "",
+          `</div>`,
+        ];
+        return parts.join("");
+      }).join("");
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    let lastStoryboardFetch = 0;
+
+    async function updateStoryboard(task) {
+      const url = await resolveStoryboardUrl(task);
+      if (!url) {
+        $("storyboardBox").classList.add("hidden");
+        return;
+      }
+      const now = Date.now();
+      const stage = task.stage || "";
+      const pastStoryboard = stage !== "pending" && stage !== "storyboard";
+      if (!pastStoryboard && now - lastStoryboardFetch < 1500) return;
+      try {
+        const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + now);
+        if (!res.ok) throw new Error(res.status);
+        const sb = await res.json();
+        lastStoryboardFetch = now;
+        renderStoryboard(sb);
+      } catch {
+        $("storyboardBox").classList.add("hidden");
+      }
+    }
+
+    async function updatePreview(task) {
+      const box = $("previewBox");
+      const video = $("previewVideo");
+      let picked = pickPreviewUrl(task);
+
+      if (!picked && task.task_id) {
+        for (const [file, kind] of [
+          ["final.mp4", "final"],
+          ["concat.mp4", "concat"],
+          ["muxed.mp4", "muxed"],
+        ]) {
+          const url = await probeOutputUrl(task.task_id, file);
+          if (url) {
+            picked = { url, kind };
+            break;
+          }
+        }
+      }
+
+      if (!picked) {
+        box.classList.add("hidden");
+        video.removeAttribute("src");
+        video.load();
+        return;
+      }
+
+      const bust = picked.url + (picked.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+      box.classList.remove("hidden");
+      if (video.getAttribute("src") !== bust) {
+        video.src = bust;
+        video.load();
+      }
+      const trackUrl = await resolveSubtitleTrack(task);
+      attachSubtitleTrack(video, trackUrl);
+
+      $("previewOpen").href = picked.url;
+      $("previewDownload").href = picked.url;
+      $("previewDownload").download = picked.url.split("/").pop() || "output.mp4";
+
+      const hints = {
+        final: trackUrl
+          ? "软字幕轨（预览已自动加载字幕；下载后用 VLC 等播放器也可开启字幕）"
+          : "最终成片（配音已合成，字幕文件未找到）",
+        concat: "视频片段拼接预览（无配音字幕）",
+        muxed: "混音预览（配音已合成，字幕未封装）",
+      };
+      $("previewHint").textContent = hints[picked.kind] || "";
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch("/api/v1/health");
+        const data = await res.json();
+        const ok = data.comfyui?.healthy;
+        $("healthDot").className = "dot " + (ok ? "ok" : "err");
+        const gpu = data.comfyui?.devices?.[0]?.name || "未知";
+        $("healthText").textContent = ok
+          ? `ComfyUI 就绪 · ${gpu.split(":").pop()?.trim() || gpu}`
+          : "ComfyUI 未连接（keyframe 之后阶段将失败）";
+      } catch {
+        $("healthDot").className = "dot err";
+        $("healthText").textContent = "API 不可用";
+      }
+    }
+
+    function renderTask(task) {
+      $("taskCard").classList.remove("hidden");
+      $("taskId").textContent = task.task_id;
+      const stage = task.stage || "pending";
+      const tag = $("stageTag");
+      tag.textContent = stage;
+      tag.className = "stage-tag" + (task.error ? " fail" : TERMINAL.has(stage) ? " done" : "");
+
+      const pct = Math.round((task.progress || 0) * 100);
+      $("progressBar").style.width = pct + "%";
+      $("progressText").textContent = `进度 ${pct}% · stop_at=${task.stop_at || "—"}`;
+
+      const outputs = task.outputs || {};
+      const keys = Object.keys(outputs);
+      if (keys.length) {
+        $("outputsBox").classList.remove("hidden");
+        $("outputsList").innerHTML = keys.map((k) => {
+          const url = toOutputUrl(outputs[k]);
+          const label = `${k}: ${outputs[k]}`;
+          return url
+            ? `<a href="${url}" target="_blank" rel="noopener">${label}</a>`
+            : `<span style="color:var(--muted);font-size:0.85rem">${label}</span>`;
+        }).join("");
+      }
+
+      updateStoryboard(task);
+      updatePreview(task);
+
+      if (task.error) {
+        $("errorBox").classList.remove("hidden");
+        $("errorBox").textContent = task.error;
+        return true;
+      } else {
+        $("errorBox").classList.add("hidden");
+      }
+
+      const done = stage === task.stop_at || (task.stop_at === "final" && stage === "final");
+      return done;
+    }
+
+    async function pollTask(taskId) {
+      const res = await fetch(`/api/v1/tasks/${taskId}`);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function startPoll(taskId) {
+      if (pollTimer) clearInterval(pollTimer);
+      const tick = async () => {
+        try {
+          const task = await pollTask(taskId);
+          if (renderTask(task)) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            $("submitBtn").disabled = false;
+          }
+        } catch (e) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+          $("submitBtn").disabled = false;
+          $("errorBox").classList.remove("hidden");
+          $("errorBox").textContent = String(e);
+        }
+      };
+      tick();
+      pollTimer = setInterval(tick, 2000);
+    }
+
+    $("submitBtn").addEventListener("click", async () => {
+      const subject = $("subject").value.trim();
+      if (!subject) {
+        alert("请输入视频主题");
+        return;
+      }
+      $("submitBtn").disabled = true;
+      $("outputsBox").classList.add("hidden");
+      $("outputsList").innerHTML = "";
+      $("errorBox").classList.add("hidden");
+      $("previewBox").classList.add("hidden");
+      $("storyboardBox").classList.add("hidden");
+      $("storyboardFrames").innerHTML = "";
+      lastStoryboardFetch = 0;
+      $("previewVideo").removeAttribute("src");
+      $("progressBar").style.width = "0%";
+
+      try {
+        const res = await fetch("/api/v1/pipeline", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject,
+            stop_at: $("stopAt").value,
+            profile: $("profile").value,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        $("taskCard").classList.remove("hidden");
+        $("taskId").textContent = data.task_id;
+        $("progressText").textContent = "任务已提交，轮询中…";
+        history.replaceState(null, "", `?task_id=${data.task_id}`);
+        startPoll(data.task_id);
+      } catch (e) {
+        $("submitBtn").disabled = false;
+        $("taskCard").classList.remove("hidden");
+        $("errorBox").classList.remove("hidden");
+        $("errorBox").textContent = String(e);
+      }
+    });
+
+    checkHealth();
+    setInterval(checkHealth, 30000);
+
+    const initialTaskId = new URLSearchParams(location.search).get("task_id");
+    if (initialTaskId) startPoll(initialTaskId);
+  </script>
+</body>
+</html>

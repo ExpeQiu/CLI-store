@@ -14,17 +14,31 @@ from vplatform.models.storyboard import Storyboard
 
 
 class VideoPostService:
-    def concat_clips(self, clip_paths: list[str | Path], output_path: Path, fps: int = 16) -> Path:
+    def concat_clips(
+        self,
+        clip_paths: list[str | Path],
+        output_path: Path,
+        fps: int = 16,
+        transition: str = "cut",
+        transition_duration: float = 0.5,
+    ) -> Path:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if not clip_paths:
             raise ValueError("无视频片段可拼接")
 
         if len(clip_paths) == 1:
-            import shutil
-
             shutil.copy2(clip_paths[0], output_path)
             return output_path
 
+        if transition == "fade" and transition_duration > 0:
+            try:
+                return self._concat_xfade(clip_paths, output_path, fps, transition_duration)
+            except Exception as exc:
+                logger.warning("xfade 转场失败，降级硬切: {}", exc)
+
+        return self._concat_hard(clip_paths, output_path, fps)
+
+    def _concat_hard(self, clip_paths: list[str | Path], output_path: Path, fps: int) -> Path:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
             for clip in clip_paths:
                 f.write(f"file '{Path(clip).resolve()}'\n")
@@ -51,8 +65,122 @@ class VideoPostService:
         ]
         self._run(cmd, "concat")
         Path(list_file).unlink(missing_ok=True)
-        logger.info("视频拼接完成 {}", output_path)
+        logger.info("视频硬切拼接完成 {}", output_path)
         return output_path
+
+    def _concat_xfade(
+        self,
+        clip_paths: list[str | Path],
+        output_path: Path,
+        fps: int,
+        transition_duration: float,
+    ) -> Path:
+        """多段 clip 淡入淡出拼接（xfade）。"""
+        durations = [self.probe_duration(p) for p in clip_paths]
+        inputs: list[str] = []
+        for clip in clip_paths:
+            inputs.extend(["-i", str(Path(clip).resolve())])
+
+        if len(clip_paths) == 2:
+            offset = max(durations[0] - transition_duration, 0.01)
+            filter_complex = (
+                f"[0:v][1:v]xfade=transition=fade:duration={transition_duration}:offset={offset}[vout]"
+            )
+        else:
+            parts: list[str] = []
+            cumulative = durations[0]
+            prev = "[0:v]"
+            for i in range(1, len(clip_paths)):
+                offset = max(cumulative - transition_duration, 0.01)
+                out_label = f"[v{i}]" if i < len(clip_paths) - 1 else "[vout]"
+                parts.append(
+                    f"{prev}[{i}:v]xfade=transition=fade:duration={transition_duration}:offset={offset}{out_label}"
+                )
+                prev = out_label
+                cumulative += durations[i] - transition_duration
+            filter_complex = ";".join(parts)
+
+        cmd = [
+            "ffmpeg",
+            "-y",
+            *inputs,
+            "-filter_complex",
+            filter_complex,
+            "-map",
+            "[vout]",
+            "-c:v",
+            "libx264",
+            "-crf",
+            "18",
+            "-pix_fmt",
+            "yuv420p",
+            "-r",
+            str(fps),
+            "-an",
+            str(output_path),
+        ]
+        self._run(cmd, "concat_xfade")
+        logger.info("视频 xfade 拼接完成 clips={} {}", len(clip_paths), output_path)
+        return output_path
+
+    def ken_burns_clip(
+        self,
+        image_path: str | Path,
+        duration_sec: float,
+        output_path: Path,
+        fps: int = 16,
+        zoom: float = 1.08,
+    ) -> Path:
+        """关键帧 Ken Burns 动效（zoompan），用于过渡镜降本。"""
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        frames = max(int(duration_sec * fps), fps)
+        # 缓慢放大：从 1.0 到 zoom
+        zoom_inc = (zoom - 1.0) / max(frames, 1)
+        filter_expr = (
+            f"zoompan=z='min(zoom+{zoom_inc:.6f},{zoom})':"
+            f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+            f"d={frames}:s=512x288:fps={fps}"
+        )
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-loop",
+            "1",
+            "-i",
+            str(Path(image_path).resolve()),
+            "-vf",
+            filter_expr,
+            "-t",
+            str(duration_sec),
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            str(output_path),
+        ]
+        self._run(cmd, "ken_burns")
+        logger.info("Ken Burns 片段完成 duration={:.1f}s {}", duration_sec, output_path)
+        return output_path
+
+    @staticmethod
+    def probe_duration(video_path: str | Path) -> float:
+        cmd = [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            str(Path(video_path).resolve()),
+        ]
+        try:
+            proc = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            return max(float(proc.stdout.strip()), 0.5)
+        except (subprocess.CalledProcessError, ValueError) as exc:
+            logger.warning("ffprobe 失败 path={} err={}，使用默认 3s", video_path, exc)
+            return 3.0
 
     def trim_to_duration(self, video_path: Path, duration_sec: float, output_path: Path) -> Path:
         cmd = [

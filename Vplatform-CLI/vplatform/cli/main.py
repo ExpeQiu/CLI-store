@@ -33,6 +33,7 @@ TOP_LEVEL_COMMANDS = frozenset(
         "task",
         "workflow",
         "status",
+        "image",
     }
 )
 
@@ -188,6 +189,67 @@ def cmd_workflow_validate(args: argparse.Namespace) -> int:
 
 
 
+def cmd_image(args: argparse.Namespace) -> int:
+    from datetime import datetime, timezone
+
+    from vplatform.services.comfyui import ComfyUIError
+    from vplatform.services.provider_router import ProviderRouter
+
+    if not args.prompt:
+        return emit_error("请提供 --prompt/-p")
+
+    core = _core(args)
+    config = core.config
+    profile = args.profile or config.comfyui.default_profile
+    profile_params = config.pipeline.profiles.get(profile, {})
+
+    if args.workflow:
+        workflow = args.workflow
+    elif args.flux:
+        workflow = config.pipeline.flux_workflow
+    else:
+        workflow = config.pipeline.keyframe_workflow
+
+    if args.output_dir:
+        output_dir = Path(args.output_dir)
+    else:
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        output_dir = core.root / "outputs" / "images" / ts
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    router = ProviderRouter(core.root, config.provider, config.comfyui.endpoint)
+    try:
+        endpoint, provider = router.select_endpoint()
+    except RuntimeError as exc:
+        return emit_error(str(exc))
+
+    core.comfyui.api.endpoint = endpoint.rstrip("/")
+    logger.info("单独生图 workflow={} provider={} endpoint={}", workflow, provider, endpoint)
+
+    try:
+        path = core.comfyui.t2i(
+            args.prompt,
+            args.negative or "",
+            output_dir,
+            workflow_name=workflow,
+            profile=profile_params,
+        )
+    except ComfyUIError as exc:
+        return emit_error(str(exc))
+
+    emit(
+        {
+            "status": "ok",
+            "path": str(path),
+            "workflow": workflow,
+            "provider": provider,
+            "endpoint": endpoint,
+            "prompt": args.prompt,
+        }
+    )
+    return 0
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     from vplatform.services.comfyui import ComfyUIAPI
 
@@ -274,6 +336,23 @@ def build_parser() -> argparse.ArgumentParser:
     status = sub.add_parser("status", parents=[parent], help="ComfyUI 连通性检查")
     status.add_argument("--endpoint")
     status.set_defaults(handler=cmd_status)
+
+    image = sub.add_parser("image", parents=[parent], help="单独文生图（不走流水线）")
+    image.add_argument("--prompt", "-p", required=True, help="正向提示词")
+    image.add_argument("--negative", "-n", default="", help="反向提示词")
+    image.add_argument(
+        "--workflow",
+        "-w",
+        help="工作流名称（默认 pipeline.keyframe_workflow）",
+    )
+    image.add_argument(
+        "--flux",
+        action="store_true",
+        help="使用 FLUX 工作流（pipeline.flux_workflow）",
+    )
+    image.add_argument("--profile", choices=["default", "fast"], default=None)
+    image.add_argument("--output-dir", "-o", help="输出目录（默认 outputs/images/<timestamp>）")
+    image.set_defaults(handler=cmd_image)
 
     return parser
 

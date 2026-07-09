@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "comfyui-cli"
+version = "0.1.0"
+description = "Comfyui-CLI — 完全封装 ComfyUI 的图片/视频/数字人 CLI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0.0",
+    "loguru>=0.7.0",
+    "httpx>=0.28.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.28.0",
+]
+
+[project.scripts]
+comfyui = "comfyui.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["comfyui"]

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+<?xml version="1.0" ?>
+<fcpxml version="1.11">
+  <resources>
+    <format id="r1" name="FFVideoFormat1080p30" frameDuration="100/3000s" width="1920" height="1080"/>
+    <asset id="r2" name="demo_source.mp4" src="file:///Volumes/Lexar/git/15CLI/Video-editing-CLI/outputs/20260709_114434_ae9b5c28/demo_source.mp4" start="0s" duration="126000/3000s" hasVideo="1" hasAudio="1" format="r1"/>
+  </resources>
+  <library>
+    <event name="A-Roll Edit">
+      <project name="Timeline">
+        <sequence format="r1" duration="26300/3000s" tcStart="0s" tcFormat="NDF">
+          <spine>
+            <asset-clip ref="r2" name="clip_001" offset="0/3000s" start="2700/3000s" duration="6200/3000s" tcFormat="NDF"/>
+            <asset-clip ref="r2" name="clip_002" offset="6200/3000s" start="35700/3000s" duration="6400/3000s" tcFormat="NDF"/>
+            <asset-clip ref="r2" name="clip_003" offset="12600/3000s" start="53700/3000s" duration="7200/3000s" tcFormat="NDF"/>
+            <asset-clip ref="r2" name="clip_004" offset="19800/3000s" start="74700/3000s" duration="6500/3000s" tcFormat="NDF"/>
+          </spine>
+        </sequence>
+      </project>
+    </event>
+  </library>
+</fcpxml>

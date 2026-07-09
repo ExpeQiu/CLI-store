@@ -2,6 +2,7 @@
   "$schema": "https://compo.dev/schemas/cli-agent-manifest/v1",
   "name": "clauto",
   "version": "0.2.0",
+  "description": "汽车情报 CLI：工信部公告 / 新闻 / 车型监测 / intel 管道",
   "cli": {
     "command": "clauto",
     "install": "pip install -e .",
@@ -24,7 +25,9 @@
       "cli_template": "clauto news --demo --format json",
       "agent_safe": true,
       "interactive": false,
-      "timeout_sec": 60
+      "timeout_sec": 60,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
     },
     {
       "name": "monitor-demo",
@@ -36,7 +39,83 @@
       "params": {
         "brand": { "type": "string", "default": "比亚迪" },
         "model": { "type": "string", "default": "海豹" }
+      },
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "2": "no_data", "3": "scrape_failed" }
+    },
+    {
+      "name": "intel-migrate",
+      "description": "修复 intel_pre_launch 字段并创建分析视图",
+      "cli_template": "clauto intel migrate --format json",
+      "agent_safe": false,
+      "interactive": false,
+      "timeout_sec": 120,
+      "reason": "生产 schema 迁移，由 SIM daily-intel 编排调用"
+    },
+    {
+      "name": "intel-backfill",
+      "description": "从 focus_vehicles / post_launch 回填 intel_pre_launch",
+      "cli_template": "clauto intel backfill --format json",
+      "agent_safe": "write_with_confirm",
+      "interactive": false,
+      "timeout_sec": 180,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "1": "error" }
+    },
+    {
+      "name": "intel-collect",
+      "description": "miit/news 抓取信号直写 intel_pre_launch（主路径）",
+      "cli_template": "clauto intel collect --format json",
+      "agent_safe": "write_with_confirm",
+      "interactive": false,
+      "timeout_sec": 600,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "1": "error" },
+      "reason": "SIM daily-intel 主编排步骤，不依赖飞书"
+    },
+    {
+      "name": "intel-sync-bitable",
+      "description": "[legacy] 飞书 Bitable 同步到 intel_pre_launch",
+      "cli_template": "clauto intel sync-bitable --format json",
+      "agent_safe": "write_with_confirm",
+      "interactive": false,
+      "timeout_sec": 300,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "1": "error" },
+      "reason": "legacy 路径；主路径为 intel collect 直写 PG"
+    },
+    {
+      "name": "intel-bitable-fields",
+      "description": "列出 Bitable 表/字段（诊断）",
+      "cli_template": "clauto intel bitable-fields --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 60,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "1": "error" },
+      "reason": "需 FEISHU 凭证"
+    },
+    {
+      "name": "intel-gap-analysis",
+      "description": "技术空白分析报告（只读聚合）",
+      "cli_template": "clauto intel gap-analysis --format json",
+      "agent_safe": true,
+      "interactive": false,
+      "timeout_sec": 120,
+      "output": { "format": "json" },
+      "exit_codes": { "0": "success", "1": "error" }
+    }
+  ],
+  "definitions": {
+    "intel_gap_response": {
+      "type": "object",
+      "required": ["module", "data_source"],
+      "properties": {
+        "module": { "const": "intel-gap-analysis" },
+        "data_source": { "enum": ["live", "demo"] },
+        "gaps": { "type": "array" },
+        "summary": { "type": "object" }
       }
     }
-  ]
+  }
 }

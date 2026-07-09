@@ -1,0 +1,28 @@
+{
+  "name": "video-edit",
+  "version": "0.2.0",
+  "description": "AI 辅助 A-Roll 口播初剪 CLI",
+  "commands": {
+    "aroll run": {
+      "description": "完整 A-Roll 初剪流水线",
+      "agent_safe": true,
+      "demo": "video-edit aroll run --demo"
+    },
+    "aroll transcribe": {
+      "description": "视频转录为 transcript.json",
+      "agent_safe": false
+    },
+    "aroll align": {
+      "description": "脚本与转录对齐",
+      "agent_safe": true
+    },
+    "aroll export": {
+      "description": "导出 FCPXML 时间轴",
+      "agent_safe": true
+    },
+    "health": {
+      "description": "依赖健康检查",
+      "agent_safe": true
+    }
+  }
+}

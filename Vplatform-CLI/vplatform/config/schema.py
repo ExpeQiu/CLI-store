@@ -53,6 +53,17 @@ class PipelineConfig(BaseModel):
     t2v_workflow: str = "wan2.1_txt2vid"
     fps: int = 16
     use_flux_keyframe: bool = False
+    # 镜间转场：cut=硬切 fade=淡入淡出
+    transition: str = "fade"
+    transition_duration_sec: float = 0.5
+    # 首镜定调：后续镜 T2I prompt 前缀复用首镜风格锚点
+    use_keyframe_consistency: bool = True
+    # 过渡镜用 Ken Burns 替代 I2V（降本）
+    ken_burns_for_transitions: bool = True
+    ken_burns_zoom: float = 1.08
+    # 单镜失败重试与跳过
+    frame_max_retries: int = 2
+    skip_failed_frames: bool = True
     profiles: dict[str, dict[str, Any]] = Field(
         default_factory=lambda: {
             "default": {"width": 832, "height": 480, "length": 49, "steps": 20},

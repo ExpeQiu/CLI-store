@@ -1,0 +1,110 @@
+{
+  "name": "SD1.5 图生图",
+  "version": "1.0",
+  "category": "image",
+  "capability": "i2i",
+  "source": "local",
+  "profile": "default",
+  "description": "基于 SD1.5 checkpoint 的图生图工作流",
+  "models": {
+    "checkpoint": "v1-5-pruned-emaonly.safetensors"
+  },
+  "defaults": {
+    "positive_prompt": "high quality, detailed",
+    "negative_prompt": "blurry, low quality, distorted, watermark",
+    "width": 512,
+    "height": 512,
+    "steps": 20,
+    "cfg": 7.5,
+    "sampler_name": "euler",
+    "scheduler": "normal",
+    "denoise": 0.75,
+    "seed": -1,
+    "image_name": "input.png"
+  },
+  "required_nodes": [
+    "CheckpointLoaderSimple",
+    "CLIPTextEncode",
+    "LoadImage",
+    "VAEEncode",
+    "KSampler",
+    "VAEDecode",
+    "SaveImage"
+  ],
+  "inject": {
+    "positive_prompt": ["6", "inputs", "text"],
+    "negative_prompt": ["7", "inputs", "text"],
+    "image_name": ["10", "inputs", "image"],
+    "seed": ["3", "inputs", "seed"],
+    "steps": ["3", "inputs", "steps"],
+    "cfg": ["3", "inputs", "cfg"],
+    "sampler_name": ["3", "inputs", "sampler_name"],
+    "scheduler": ["3", "inputs", "scheduler"],
+    "denoise": ["3", "inputs", "denoise"]
+  },
+  "output_nodes": ["9"],
+  "prompt": {
+    "3": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 0,
+        "steps": 20,
+        "cfg": 7.5,
+        "sampler_name": "euler",
+        "scheduler": "normal",
+        "denoise": 0.75,
+        "model": ["4", 0],
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "latent_image": ["11", 0]
+      }
+    },
+    "4": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": {
+        "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+      }
+    },
+    "6": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "high quality, detailed",
+        "clip": ["4", 1]
+      }
+    },
+    "7": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "blurry, low quality, distorted, watermark",
+        "clip": ["4", 1]
+      }
+    },
+    "8": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": ["3", 0],
+        "vae": ["4", 2]
+      }
+    },
+    "9": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "filename_prefix": "comfyui_i2i",
+        "images": ["8", 0]
+      }
+    },
+    "10": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "input.png"
+      }
+    },
+    "11": {
+      "class_type": "VAEEncode",
+      "inputs": {
+        "pixels": ["10", 0],
+        "vae": ["4", 2]
+      }
+    }
+  }
+}

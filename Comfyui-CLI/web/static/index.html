@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comfyui-CLI</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1>Comfyui-CLI</h1>
+      <p class="subtitle">图片 / 视频生成控制台</p>
+    </div>
+    <div class="status-bar" id="statusBar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">检查中…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="t2i">文生图</button>
+      <button class="tab" data-tab="t2v">文生视频</button>
+      <button class="tab" data-tab="i2v">图生视频</button>
+      <button class="tab" data-tab="workflows">工作流</button>
+    </nav>
+
+    <!-- 文生图 -->
+    <section class="panel active" id="panel-t2i">
+      <form id="formT2i" class="form">
+        <label>
+          正向提示词
+          <textarea name="prompt" rows="3" placeholder="白底红苹果，产品摄影，高清" required></textarea>
+        </label>
+        <label>
+          负向提示词
+          <input type="text" name="negative_prompt" placeholder="可选" />
+        </label>
+        <div class="row">
+          <label>
+            Profile
+            <select name="profile" id="profileT2i"></select>
+          </label>
+          <label>
+            工作流
+            <select name="workflow" id="workflowT2i">
+              <option value="">默认</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" class="btn primary">生成图片</button>
+      </form>
+    </section>
+
+    <!-- 文生视频 -->
+    <section class="panel" id="panel-t2v">
+      <form id="formT2v" class="form">
+        <label>
+          正向提示词
+          <textarea name="prompt" rows="3" placeholder="无人机航拍城市夜景，电影感" required></textarea>
+        </label>
+        <label>
+          负向提示词
+          <input type="text" name="negative_prompt" placeholder="可选" />
+        </label>
+        <div class="row">
+          <label>
+            Profile
+            <select name="profile" id="profileT2v"></select>
+          </label>
+          <label>
+            帧数 length
+            <input type="number" name="length" placeholder="默认" min="9" step="4" />
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            工作流
+            <select name="workflow" id="workflowT2v">
+              <option value="">默认</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" class="btn primary">生成视频</button>
+      </form>
+    </section>
+
+    <!-- 图生视频 -->
+    <section class="panel" id="panel-i2v">
+      <form id="formI2v" class="form" enctype="multipart/form-data">
+        <label>
+          关键帧图片
+          <input type="file" name="image" accept="image/*" required />
+        </label>
+        <div class="preview" id="i2vPreview"></div>
+        <label>
+          运动描述
+          <textarea name="prompt" rows="3" placeholder="缓慢推进镜头，电影感运动" required></textarea>
+        </label>
+        <label>
+          负向提示词
+          <input type="text" name="negative_prompt" placeholder="可选" />
+        </label>
+        <div class="row">
+          <label>
+            时长（秒）
+            <input type="number" name="duration" placeholder="如 3" min="1" step="0.5" />
+          </label>
+          <label>
+            Profile
+            <select name="profile" id="profileI2v"></select>
+          </label>
+        </div>
+        <button type="submit" class="btn primary">生成视频</button>
+      </form>
+    </section>
+
+    <!-- 工作流 -->
+    <section class="panel" id="panel-workflows">
+      <div class="workflow-list" id="workflowList">
+        <p class="muted">加载中…</p>
+      </div>
+    </section>
+
+    <!-- 任务与结果 -->
+    <aside class="result-panel">
+      <h2>任务状态</h2>
+      <div id="jobStatus" class="job-status muted">暂无任务</div>
+      <div id="resultArea" class="result-area"></div>
+      <h3>最近任务</h3>
+      <ul id="jobHistory" class="job-history"></ul>
+    </aside>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{
+  "source_video": "outputs/20260709_114434_ae9b5c28/demo_source.mp4",
+  "frame_rate": 30.0,
+  "total_source_sec": 42.0,
+  "total_output_sec": 8.750000000000004,
+  "retain_ratio": 0.2083,
+  "clips": [
+    {
+      "id": "cut_001",
+      "action": "cut",
+      "source_in": 0.0,
+      "source_out": 0.9,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_001",
+      "action": "keep",
+      "source_in": 0.9,
+      "source_out": 2.95,
+      "script_ref": "句1",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_002",
+      "action": "cut",
+      "source_in": 2.95,
+      "source_out": 11.9,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_002",
+      "action": "keep",
+      "source_in": 11.9,
+      "source_out": 14.049999999999999,
+      "script_ref": "句2",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_003",
+      "action": "cut",
+      "source_in": 14.049999999999999,
+      "source_out": 17.9,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_003",
+      "action": "keep",
+      "source_in": 17.9,
+      "source_out": 20.3,
+      "script_ref": "句3",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_004",
+      "action": "cut",
+      "source_in": 20.3,
+      "source_out": 24.9,
+      "script_ref": "",
+      "reason": "gap_or_duplicate"
+    },
+    {
+      "id": "clip_004",
+      "action": "keep",
+      "source_in": 24.9,
+      "source_out": 27.05,
+      "script_ref": "句4",
+      "reason": "matched_script"
+    },
+    {
+      "id": "cut_005",
+      "action": "cut",
+      "source_in": 27.05,
+      "source_out": 42.0,
+      "script_ref": "",
+      "reason": "trailing_unused"
+    }
+  ],
+  "stats": {
+    "cuts": 5,
+    "kept_clips": 4,
+    "breath_gaps_applied": 3
+  }
+}

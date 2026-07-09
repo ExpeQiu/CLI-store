@@ -7,15 +7,21 @@
     {
       "index": 0,
       "narration": "中文旁白，15-30字",
-      "image_prompt": "English image prompt for keyframe, cinematic, detailed",
-      "motion_prompt": "English motion description for video, e.g. slow pan, gentle zoom",
-      "negative_prompt": "blurry, low quality, distorted, watermark, artifacts"
+      "image_prompt": "English image prompt for keyframe, cinematic, detailed, 8k",
+      "motion_prompt": "English motion, e.g. slow dolly in, gentle pan, cinematic",
+      "negative_prompt": "blurry, low quality, distorted, watermark, artifacts, cartoon, wrong logo",
+      "shot_type": "key",
+      "render_mode": "i2v"
     }
   ]
 }
 
 规则：
-- 分镜数量 3-5 个，叙事连贯
-- narration 使用简体中文
-- image_prompt 和 motion_prompt 使用英文
-- 每个分镜对应一个独立场景
+- 分镜数量 3-5 个，叙事连贯，总时长控制在 15-60 秒
+- narration 使用简体中文，每镜 15-30 字
+- image_prompt 和 motion_prompt 必须使用英文
+- motion_prompt 从以下词汇选用：slow dolly in/out, pan, tracking shot, aerial drone, close-up, wide shot, static camera, smooth zoom
+- negative_prompt 固定包含：blurry, low quality, distorted, watermark, artifacts
+- shot_type: key=关键镜（产品/卖点），transition=过渡镜（可选，短旁白≤8字）
+- render_mode: key 镜用 i2v；transition 镜可用 ken_burns
+- 每个分镜对应一个独立场景，image_prompt 保持统一 cinematic automotive/product 风格
